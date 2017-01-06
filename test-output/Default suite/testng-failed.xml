@@ -5,11 +5,8 @@
     <classes>
       <class name="niki_ai.nikiApp">
         <methods>
-          <include name="privateChat"/>
-          <include name="openPrivateChat"/>
           <include name="setup"/>
           <include name="blankUserName"/>
-          <include name="end"/>
         </methods>
       </class> <!-- niki_ai.nikiApp -->
     </classes>

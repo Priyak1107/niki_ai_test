@@ -1,33 +1,24 @@
 package niki_ai;
 
-import io.appium.java_client.android.AndroidDeviceActionShortcuts;
-import io.appium.java_client.android.AndroidKeyCode;
+import io.appium.java_client.android.AndroidDriver;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.jetty.util.StringUtil;
+import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.AfterTest;
-
-import io.appium.java_client.android.AndroidDriver;
-
-import java.util.List;
-
 import org.openqa.selenium.remote.CapabilityType;
-
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 public class nikiApp {
-	
+
 	WebDriver driver;
 
 	@BeforeTest
@@ -41,58 +32,89 @@ public class nikiApp {
 		capabilities.setCapability("appPackage", "com.nikiapp");
 		driver = new RemoteWebDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities);
 		Thread.sleep(5000);
-		
+
+
 	}
-	
+
 	@Test
-		public void blankUserName()
-		{
+	public void blankUserNameTest()
+	{
 		driver.findElement(By.id("com.nikiapp:id/login_username")).sendKeys("");
 		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 		driver.findElement(By.id("com.nikiapp:id/startChatBtn")).click();
 		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		try{
+			driver.findElement(By.name("GroupChat"));
+			Assert.assertTrue(false);
+		}catch(Exception e){
+			Assert.assertTrue(true); // driver should not be able to find the next screen indicating login has failed
 		}
-	
-	
+	}
+
+
 	@Test
 	public void addUserName()
 	{
-	driver.findElement(By.id("com.nikiapp:id/login_username")).sendKeys("hi@xyz.com");
-	driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-	driver.findElement(By.id("com.nikiapp:id/startChatBtn")).click();
-	driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		driver.findElement(By.id("com.nikiapp:id/login_username")).sendKeys("hi@xyz.com");
+		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		driver.findElement(By.id("com.nikiapp:id/startChatBtn")).click();
+		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		try{
+			driver.findElement(By.name("GroupChat"));
+			Assert.assertTrue(true); // driver should be able to find the next screen indicating login is successful
+		}catch(Exception e){
+			Assert.assertTrue(false); 
+		}
 	}
-	
-	
+
 	@Test
-		public void closeGroupChat(){
+	public void sendGroupChatMessage(){
 		driver.findElement(By.name("GroupChat")).click();
 		driver.findElement(By.name("Enter message")).sendKeys("hi");
 		driver.findElement(By.id("com.nikiapp:id/sendMessage")).click();
 		driver.findElement(By.className("android.widget.ImageButton")).click();
 		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-		driver.findElement(By.name("GroupChat")).click();
-		driver.findElement(By.className("android.widget.ImageButton")).click();		
 	}
-	
-	
+
 	@Test
-		public void privateChat() {
+	public void verifySentGroupMessage(){
+		driver.findElement(By.name("GroupChat")).click();
+		String message = driver.findElement(By.id("com.nikiapp:id/chatMessage")).getText();
+		Assert.assertEquals("hi", message);
+	}
+
+	@Test
+	public void closeGroupChat(){
+		driver.findElement(By.className("android.widget.ImageButton")).click();	
+		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		try{
+			driver.findElement(By.name("com.nikiapp:id/msg_box"));
+			Assert.assertTrue(false); // driver should not be able to find the group chat window
+		}catch(Exception e){
+			Assert.assertTrue(true); 
+		}
+	}
+
+	@Test
+	public void createPrivateChatWithUser() {
 		driver.findElement(By.className("android.widget.ImageButton")).click();
 		driver.findElement(By.id("com.nikiapp:id/privateChat")).click();
 		driver.findElement(By.id("com.nikiapp:id/editTextDialogUserInput")).sendKeys("sitaram");
 		driver.findElement(By.name("OK")).click();
 	}
-	
-	
+
 	@Test
-	public void openPrivateChat()
-	{
-		driver.findElement(By.id("com.nikiapp:id/chatName")).sendKeys("Sitaram");
-		((AndroidDriver) driver).tap(1, 100, 100, 100);
-		driver.findElement(By.className("android.widget.ImageButton")).click();
+	public void openPrivateChat(){
+		driver.findElement(By.name("Sitram")).click();
+		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
 	}
-	
+
+	@Test
+	public void closePrivateChat(){
+		driver.findElement(By.className("android.widget.ImageButton")).click();
+		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+	}
+
 	@AfterTest
 	public void end(){
 		driver.quit();
